@@ -1,24 +1,35 @@
 package pl.taw;
 
+import javazoom.jl.decoder.Bitstream;
+import javazoom.jl.player.advanced.AdvancedPlayer;
+import javazoom.jl.player.advanced.PlaybackEvent;
+import javazoom.jl.player.advanced.PlaybackListener;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
 
 public class Quiz implements ActionListener {
 
     String[] questions = {
-            "Which company created Java?", "Which year was Java created?", "What was Java originally called?", "Who is credited with creating Java?"
+            "Which company created Java?",
+            "Which year was Java created?",
+            "What was Java originally called?",
+            "Who is credited with creating Java?",
+            "Does pineapple belong on Pizza?"
     };
 
     String[][] options = {
             {"Sun Microsystems", "Starbucks", "Microsoft", "Alphabet"},
             {"1989", "1996", "1972", "1492"},
             {"Apple", "Latte", "Oak", "Koffing"},
-            {"Steve Jobs", "Bill Gates", "James Gosling", "Mark Zuckerberg"}
+            {"Steve Jobs", "Bill Gates", "James Gosling", "Mark Zuckerberg"},
+            {"Yes!", "No!!!", "Maybe", "Who cares!"}
     };
 
-    char[] answers = {'A', 'B', 'C', 'C'};
+    char[] answers = {'A', 'B', 'C', 'C', 'D'};
 
     char guess;
     char answer;
@@ -49,6 +60,17 @@ public class Quiz implements ActionListener {
     Color greenLight = new Color(25, 255, 0);
     Color blackBlack = new Color(25, 25, 25);
 
+    Timer timer = new Timer(1000, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            seconds--;
+            seconds_left.setText(String.valueOf(seconds));
+            if (seconds <= 0) {
+                displayAnswer();
+            }
+        }
+    });
+
 
     public Quiz() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,6 +81,7 @@ public class Quiz implements ActionListener {
 
         textField.setBounds(0, 0, 650, 50);
         textField.setBackground(blackBlack);
+        textField.setForeground(greenLight);
         textField.setFont(new Font("Roboto", Font.BOLD, 30));
         textField.setBorder(BorderFactory.createBevelBorder(1));
         textField.setHorizontalAlignment(JTextField.CENTER);
@@ -177,6 +200,7 @@ public class Quiz implements ActionListener {
             answer_labelB.setText(options[index][1]);
             answer_labelC.setText(options[index][2]);
             answer_labelD.setText(options[index][3]);
+            timer.start();
         }
     }
 
@@ -222,9 +246,71 @@ public class Quiz implements ActionListener {
 
     public void displayAnswer() {
 
+        timer.stop();
+
+        buttonA.setEnabled(false);
+        buttonB.setEnabled(false);
+        buttonC.setEnabled(false);
+        buttonD.setEnabled(false);
+
+        if (answers[index] != 'A') {
+            answer_labelA.setForeground(Color.red);
+        }
+        if (answers[index] != 'B') {
+            answer_labelB.setForeground(Color.red);
+        }
+        if (answers[index] != 'C') {
+            answer_labelC.setForeground(Color.red);
+        }
+        if (answers[index] != 'D') {
+            answer_labelD.setForeground(Color.red);
+        }
+
+        Timer pause = new Timer(2000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                answer_labelA.setForeground(new Color(25, 255, 0));
+                answer_labelB.setForeground(new Color(25, 255, 0));
+                answer_labelC.setForeground(new Color(25, 255, 0));
+                answer_labelD.setForeground(new Color(25, 255, 0));
+
+                answer = ' ';
+                seconds = 10;
+                seconds_left.setText(String.valueOf(seconds));
+
+                buttonA.setEnabled(true);
+                buttonB.setEnabled(true);
+                buttonC.setEnabled(true);
+                buttonD.setEnabled(true);
+                index++;
+                nextQuestion();
+            }
+        });
+
+        pause.setRepeats(false);
+        pause.start();
     }
 
     public void result() {
 
+        buttonA.setEnabled(false);
+        buttonB.setEnabled(false);
+        buttonC.setEnabled(false);
+        buttonD.setEnabled(false);
+
+        result = (int) ((correct_guesses / (double) total_question) * 100);
+        textField.setText("RESULTS!");
+        textArea.setText("");
+        answer_labelA.setText("");
+        answer_labelB.setText("");
+        answer_labelC.setText("");
+        answer_labelD.setText("");
+
+        number_right.setText("(%s/%s)".formatted(correct_guesses, total_question));
+        percentage.setText(result + "%");
+
+        frame.add(number_right);
+        frame.add(percentage);
     }
+
 }
