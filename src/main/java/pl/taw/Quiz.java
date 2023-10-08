@@ -69,7 +69,11 @@ public class Quiz implements ActionListener {
 
 
     public Quiz() {
-        startGame();
+
+        FrontPanel frontPanel = new FrontPanel();
+
+
+        //startGame();
     }
 
     public void startGame() {
